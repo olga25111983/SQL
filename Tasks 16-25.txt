@@ -1,0 +1,139 @@
+Задание 16.
+Найдите пары моделей PC, имеющих одинаковые скорость и RAM. В результате каждая пара указывается только один раз, т.е. (i,j), но не (j,i), Порядок вывода: модель с большим номером, модель с меньшим номером, скорость и RAM.
+
+Решение
+SELECT DISTINCT B.model AS model_1, A.model AS model_2, A.speed, A.ram
+FROM PC AS B, PC AS A
+WHERE B.speed = A.speed AND A.ram = B.ram 
+    AND A.model < B.model
+_____________________________________________________
+Задание 17.
+Найдите модели ПК-блокнотов, скорость которых меньше скорости каждого из ПК.
+Вывести: type, model, speed
+
+Решение
+SELECT DISTINCT Product.type, Laptop.model, Laptop.speed
+FROM Laptop JOIN Product ON Laptop.model = Product.model
+WHERE speed < ALL (SELECT PC.speed FROM PC)
+______________________________________________________
+Задание 18.
+Найдите производителей самых дешевых цветных принтеров. Вывести: maker, price
+
+
+Решение
+SELECT Product.maker, MIN (price) price
+FROM Printer JOIN Product ON Printer.model = Product.model
+WHERE price = (SELECT MIN (price) price FROM Printer WHERE color = 'y') and color = 'y'
+GROUP BY Product.maker
+______________________________________________________
+Задание 19.
+Для каждого производителя, имеющего модели в таблице Laptop, найдите средний размер экрана выпускаемых им ПК-блокнотов.
+Вывести: maker, средний размер экрана.
+
+
+Решение
+SELECT Product.maker, AVG (screen) screen
+FROM Laptop JOIN Product ON Laptop.model = Product.model
+GROUP BY Product.maker
+_______________________________________________________
+Задание 20.
+Найдите производителей, выпускающих по меньшей мере три различных модели ПК. Вывести: Maker, число моделей ПК.
+
+
+Решение
+SELECT maker, COUNT (model) count_model
+FROM Product 
+WHERE type = 'PC'
+GROUP BY Product.maker
+HAVING COUNT (model) >= 3
+_________________________________________________________
+Задание 21.
+Найдите максимальную цену ПК, выпускаемых каждым производителем, у которого есть модели в таблице PC.
+Вывести: maker, максимальная цена.
+
+
+Решение
+SELECT maker, MAX (PC.price) price 
+FROM PC JOIN Product ON PC.model = Product.model
+GROUP BY maker
+___________________________________________
+Задание 22.
+Для каждого значения скорости ПК, превышающего 600 МГц, определите среднюю цену ПК с такой же скоростью. Вывести: speed, средняя цена.
+
+
+Решение
+SELECT speed, AVG (price) price
+FROM PC
+WHERE speed > 600
+GROUP BY speed
+___________________________________________
+Задание 23.
+Найдите производителей, которые производили бы как ПК
+со скоростью не менее 750 МГц, так и ПК-блокноты со скоростью не менее 750 МГц.
+Вывести: Maker
+
+
+Решение
+SELECT DISTINCT maker
+FROM PC JOIN Product ON PC.model = Product.model
+WHERE speed >=750
+INTERSECT
+SELECT DISTINCT maker
+FROM Laptop JOIN Product ON Laptop.model = Product.model
+WHERE speed >=750
+__________________________________________
+Задание 24.
+Перечислите номера моделей любых типов, имеющих самую высокую цену по всей имеющейся в базе данных продукции.
+
+
+Решение
+Select model 
+FROM (
+SELECT model, price
+FROM PC
+UNION
+SELECT model, price 
+FROM Laptop
+UNION
+SELECT model, price
+FROM Printer) this_table
+WHERE  price = (
+SELECT MAX (price)
+FROM (
+SELECT model, price
+FROM PC
+UNION
+SELECT model, price
+FROM Laptop
+UNION
+SELECT model, price
+FROM Printer) this_table_2
+)
+_____________________________________
+Задание 25.
+
+Найдите производителей принтеров, которые производят ПК с наименьшим объемом RAM и с самым быстрым процессором среди всех ПК, имеющих наименьший объем RAM. Вывести: Maker
+
+Решение
+SELECT DISTINCT maker
+FROM PC JOIN Product ON PC.model = Product.model
+WHERE maker IN (
+SELECT DISTINCT maker 
+FROM product
+WHERE type = 'printer') AND
+speed = (
+
+SELECT MAX (speed)
+FROM PC
+WHERE ram = (
+SELECT MIN (ram)
+FROM PC))
+AND ram = (
+SELECT MIN (ram)
+FROM PC)
+
+
+
+
+
+
